@@ -1,0 +1,32 @@
+@import "tailwindcss";
+:root {
+  --bg: #0b0f1a;
+  --card: rgba(255, 255, 255, 0.05);
+  --border: rgba(255, 255, 255, 0.08);
+
+  --blue: #4f8cff;
+  --purple: #7c5cff;
+}
+@theme {
+  --animate-breathe: breathe 12s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1) translate(0, 0);
+  }
+  25% {
+    transform: scale(1.1) translate(20px, -30px);
+  }
+  50% {
+    transform: scale(1.2) translate(-20px, 20px);
+  }
+  75% {
+    transform: scale(1.1) translate(10px, 30px);
+  }
+}
+
+.animate-breathe {
+  animation: var(--animate-breathe);
+}
