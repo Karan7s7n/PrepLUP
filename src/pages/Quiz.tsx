@@ -35,7 +35,11 @@ export default function Quiz() {
   const [timeLeft, setTimeLeft] = useState(0);
   const submittedRef = useRef(false);
 
+<<<<<<< HEAD
   // ✅ ANALYTICS
+=======
+  // 📊 ANALYTICS
+>>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
   const [chartData, setChartData] = useState<any[]>([]);
   const [stats, setStats] = useState({
     totalTests: 0,
@@ -44,12 +48,17 @@ export default function Quiz() {
   });
 
   ////////////////////////////////////////////////////
+<<<<<<< HEAD
   // 📊 FETCH ANALYTICS (FIXED + SAFE)
+=======
+  // 📊 FETCH ANALYTICS (FIXED)
+>>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
   ////////////////////////////////////////////////////
   useEffect(() => {
     if (!user) return;
 
     const fetch = async () => {
+<<<<<<< HEAD
       try {
         const { data: tests } = await supabase
           .from("tests")
@@ -129,6 +138,52 @@ export default function Quiz() {
       } catch (err) {
         console.error("Analytics error:", err);
       }
+=======
+      const { data: tests } = await supabase
+        .from("tests")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: true });
+
+      if (!tests || tests.length === 0) return;
+
+      // LAST 10 for chart
+      const last10 = tests.slice(-10);
+
+      const chart = last10.map((t, i) => ({
+        name: `T${i + 1}`,
+        score:
+          t.total_questions > 0
+            ? Math.round((t.score / t.total_questions) * 100)
+            : 0,
+      }));
+
+      // SAFE CALCULATIONS
+      let totalAcc = 0;
+
+      tests.forEach((t) => {
+        if (t.total_questions > 0) {
+          totalAcc += (t.score / t.total_questions) * 100;
+        }
+      });
+
+      const avg = Math.round(totalAcc / tests.length);
+
+      const best = Math.max(
+        ...tests.map((t) =>
+          t.total_questions > 0
+            ? Math.round((t.score / t.total_questions) * 100)
+            : 0
+        )
+      );
+
+      setChartData(chart);
+      setStats({
+        totalTests: tests.length,
+        avgAccuracy: avg || 0,
+        bestScore: best || 0,
+      });
+>>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
     };
 
     fetch();
@@ -163,7 +218,11 @@ export default function Quiz() {
   };
 
   ////////////////////////////////////////////////////
+<<<<<<< HEAD
   // ⏱ TIMER
+=======
+  // ⏱ TIMER FIXED
+>>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
   ////////////////////////////////////////////////////
   useEffect(() => {
     if (!started) return;
@@ -261,33 +320,49 @@ export default function Quiz() {
   };
 
   ////////////////////////////////////////////////////
+<<<<<<< HEAD
   // 🎯 START SCREEN (FIXED ANALYTICS UI)
+=======
+  // PRE START UI
+>>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
   ////////////////////////////////////////////////////
   if (!started) {
     return (
       <div className="min-h-screen px-6 pt-28">
         <div className="max-w-6xl mx-auto space-y-8">
 
+<<<<<<< HEAD
           {/* HERO */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             className="p-12 rounded-3xl bg-gradient-to-r from-purple-600 to-blue-500 text-white shadow-xl"
           >
+=======
+          <motion.div className="p-12 rounded-3xl bg-gradient-to-r from-purple-600 to-blue-500 text-white">
+>>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
             <h1 className="text-5xl font-bold">Quiz Arena 🚀</h1>
 
             <button
               onClick={startQuiz}
               disabled={loading}
+<<<<<<< HEAD
               className="mt-6 px-8 py-4 bg-white text-black rounded-xl flex gap-2 items-center hover:scale-105 transition"
+=======
+              className="mt-6 px-8 py-4 bg-white text-black rounded-xl flex gap-2"
+>>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
             >
               <FiPlay />
               {loading ? "Loading..." : "Start Test"}
             </button>
           </motion.div>
+<<<<<<< HEAD
 
           {/* SELECTORS */}
           <div className="grid md:grid-cols-3 gap-6">
+=======
+           <div className="grid md:grid-cols-3 gap-6">
+>>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
             <SelectorCard title="Time" icon={<FiClock />} options={[
               { label: "5m", value: 300 },
               { label: "10m", value: 600 },
@@ -308,13 +383,19 @@ export default function Quiz() {
             ]} selected={questionCount} setSelected={setQuestionCount} />
           </div>
 
+<<<<<<< HEAD
           {/* STATS (ALWAYS VISIBLE NOW) */}
+=======
+
+          {/* STATS */}
+>>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
           <div className="grid md:grid-cols-3 gap-6">
             <StatCard title="Total Tests" value={stats.totalTests} />
             <StatCard title="Avg Accuracy" value={`${stats.avgAccuracy}%`} />
             <StatCard title="Best Score" value={`${stats.bestScore}%`} />
           </div>
 
+<<<<<<< HEAD
           {/* CHART (SAFE RENDER) */}
           <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
             <h3 className="mb-4">Last 10 Tests</h3>
@@ -332,32 +413,62 @@ export default function Quiz() {
             )}
           </div>
 
+=======
+          {/* CHART */}
+          <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
+            <h3 className="mb-4">Last 10 Tests</h3>
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={chartData}>
+                <XAxis dataKey="name" />
+                <Tooltip />
+                <Line type="monotone" dataKey="score" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* SELECTORS */}
+         
+>>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
         </div>
       </div>
     );
   }
 
   ////////////////////////////////////////////////////
+<<<<<<< HEAD
   // QUIZ UI (UNCHANGED)
   ////////////////////////////////////////////////////
 
+=======
+  // QUIZ UI (RESTORED)
+  ////////////////////////////////////////////////////
+>>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
   const q = questions[currentIndex];
 
   return (
     <div className="min-h-screen px-6 pt-28">
       <div className="max-w-4xl mx-auto">
 
+<<<<<<< HEAD
+=======
+        {/* HEADER */}
+>>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
         <div className="flex justify-between mb-4">
           <h2>{currentIndex + 1}/{questions.length}</h2>
           <span>⏱ {timeLeft}s</span>
         </div>
 
+<<<<<<< HEAD
+=======
+        {/* ANALYTICS */}
+>>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
         <div className="grid grid-cols-3 gap-4 mb-6">
           <StatCard title="Attempted" value={`${attempted}/${questions.length}`} />
           <StatCard title="Accuracy" value={`${accuracy}%`} />
           <StatCard title="Correct" value={correctCount} />
         </div>
 
+<<<<<<< HEAD
         <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
           <h3 className="mb-6">{q.question}</h3>
 
@@ -386,6 +497,28 @@ export default function Quiz() {
           })}
         </div>
 
+=======
+        {/* QUESTION */}
+        <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
+          <h3 className="mb-6">{q.question}</h3>
+
+          {q.options.map((opt: string) => (
+            <button
+              key={opt}
+              onClick={() => handleAnswer(q.id, opt)}
+              className={`w-full p-3 mb-3 rounded-xl ${
+                answers[q.id] === opt
+                  ? "bg-purple-600 text-white"
+                  : "bg-white/5"
+              }`}
+            >
+              {opt}
+            </button>
+          ))}
+        </div>
+
+        {/* NAV */}
+>>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
         <div className="mt-6 flex justify-between">
           <button
             onClick={() => setCurrentIndex((i) => Math.max(i - 1, 0))}
@@ -414,6 +547,10 @@ export default function Quiz() {
             </button>
           )}
         </div>
+<<<<<<< HEAD
+=======
+
+>>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
       </div>
     </div>
   );
@@ -449,4 +586,8 @@ function StatCard({ title, value }: any) {
       <h3 className="text-lg font-bold">{value}</h3>
     </div>
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9

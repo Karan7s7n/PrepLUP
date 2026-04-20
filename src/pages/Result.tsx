@@ -13,7 +13,11 @@ export default function Result() {
   const user = useAuthStore((s) => s.user);
 
   const [result, setResult] = useState<any>(null);
+<<<<<<< HEAD
   const [, setRank] = useState<number | null>(null);
+=======
+  const [rank, setRank] = useState<number | null>(null);
+>>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
   const [aiInsight, setAiInsight] = useState("Analyzing...");
   const [accuracy, setAccuracy] = useState(0);
 
@@ -38,6 +42,7 @@ export default function Result() {
 
         setResult(test);
 
+<<<<<<< HEAD
         ////////////////////////////////////////////////////
         // ✅ FIXED: fetch answers by test_id (IMPORTANT)
         ////////////////////////////////////////////////////
@@ -55,6 +60,24 @@ export default function Result() {
           answers?.filter((a) => a.is_correct).length || 0;
 
         const total = answers?.length || 1;
+=======
+        // ✅ get answers ONLY for latest test timeframe
+        const { data: answers, error: ansError } = await supabase
+          .from("test_results")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
+
+        if (ansError) return;
+
+        // 🧠 compute accuracy safely
+        const recentAnswers = answers?.slice(0, test.total_questions) || [];
+
+        const correct =
+          recentAnswers.filter((a) => a.is_correct).length || 0;
+
+        const total = recentAnswers.length || 1;
+>>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
 
         const acc = Math.round((correct / total) * 100);
         setAccuracy(acc);
@@ -73,7 +96,11 @@ export default function Result() {
         setRank(index !== -1 ? index + 1 : null);
 
         ////////////////////////////////////////////////////
+<<<<<<< HEAD
         // 🧠 AI INSIGHT
+=======
+        // 🧠 AI INSIGHT (CLEAN LOGIC)
+>>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
         ////////////////////////////////////////////////////
         if (acc < 40) {
           setAiInsight(
@@ -112,6 +139,7 @@ export default function Result() {
   }
 
   ////////////////////////////////////////////////////
+<<<<<<< HEAD
   // 🎯 CALCULATED SCORE %
   ////////////////////////////////////////////////////
   const maxPossibleScore = result.total_questions * 20; // max if all hard
@@ -120,6 +148,8 @@ export default function Result() {
   );
 
   ////////////////////////////////////////////////////
+=======
+>>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
   // 🎯 UI
   ////////////////////////////////////////////////////
   return (
@@ -141,6 +171,7 @@ export default function Result() {
         </motion.div>
 
         {/* 🔥 SCORE CARDS */}
+<<<<<<< HEAD
         <div className="grid md:grid-cols-3 gap-3">
 
           {/* ✅ FIXED: show points properly */}
@@ -157,13 +188,37 @@ export default function Result() {
             color="from-pink-500 to-rose-500"
           />
 
+=======
+        <div className="grid md:grid-cols-4 gap-4">
+
+          <Card
+            title="Score"
+            value={`${result.score}/${result.total_questions}`}
+            color="from-purple-500 to-indigo-500"
+          />
+
+>>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
           <Card
             title="Accuracy"
             value={`${accuracy}%`}
             color="from-blue-500 to-cyan-500"
           />
 
+<<<<<<< HEAD
           
+=======
+          <Card
+            title="Rank"
+            value={rank ? `#${rank}` : "--"}
+            color="from-yellow-400 to-orange-500"
+          />
+
+          <Card
+            title="Performance"
+            value={accuracy > 70 ? "Good" : "Needs Work"}
+            color="from-green-500 to-emerald-500"
+          />
+>>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
 
         </div>
 
@@ -232,4 +287,8 @@ function Card({ title, value, color }: any) {
       </div>
     </div>
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9

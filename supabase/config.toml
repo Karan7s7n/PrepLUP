@@ -405,6 +405,7 @@ entrypoint = "./functions/ai-interview/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/ai-interview/*.html" ]
+<<<<<<< HEAD
 
 [functions.ai-chat]
 enabled = true
@@ -416,3 +417,5 @@ entrypoint = "./functions/ai-chat/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/ai-chat/*.html" ]
+=======
+>>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9

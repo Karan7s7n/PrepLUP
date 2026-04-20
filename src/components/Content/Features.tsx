@@ -5,8 +5,15 @@ import { useTheme } from "../ui/ThemeContext";
 import {
   FaPenFancy,
   FaBrain,
+<<<<<<< HEAD
   FaUsers,
   FaPlay,
+=======
+  FaClock,
+  FaUsers,
+  FaTrophy,
+  FaCalendarDay,
+>>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
 } from "react-icons/fa";
 
 interface Feature {
@@ -28,7 +35,13 @@ export const Features = () => {
     { title: "Aptitude Test System (CBT Style)", icon: <FaBrain /> },
     { title: "Interview Preparation Module", icon: <FaUsers /> },
     { title: "Resume Builder", icon: <FaPenFancy /> },
+<<<<<<< HEAD
     { title: "Mindfulness Exercises", icon: <FaPlay /> },
+=======
+    { title: "Personalized Roadmap Generator", icon: <FaClock /> },
+    { title: "Leaderboard & Gamification", icon: <FaTrophy /> },
+    { title: "Daily Challenge", icon: <FaCalendarDay /> },
+>>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
   ];
 
   return (
