@@ -35,7 +35,7 @@ export default function Quiz() {
   const [timeLeft, setTimeLeft] = useState(0);
   const submittedRef = useRef(false);
 
-  // 📊 ANALYTICS
+  // ✅ ANALYTICS
   const [chartData, setChartData] = useState<any[]>([]);
   const [stats, setStats] = useState({
     totalTests: 0,
@@ -44,56 +44,91 @@ export default function Quiz() {
   });
 
   ////////////////////////////////////////////////////
-  // 📊 FETCH ANALYTICS (FIXED)
+  // 📊 FETCH ANALYTICS (FIXED + SAFE)
   ////////////////////////////////////////////////////
   useEffect(() => {
     if (!user) return;
 
     const fetch = async () => {
-      const { data: tests } = await supabase
-        .from("tests")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: true });
+      try {
+        const { data: tests } = await supabase
+          .from("tests")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: true });
 
-      if (!tests || tests.length === 0) return;
-
-      // LAST 10 for chart
-      const last10 = tests.slice(-10);
-
-      const chart = last10.map((t, i) => ({
-        name: `T${i + 1}`,
-        score:
-          t.total_questions > 0
-            ? Math.round((t.score / t.total_questions) * 100)
-            : 0,
-      }));
-
-      // SAFE CALCULATIONS
-      let totalAcc = 0;
-
-      tests.forEach((t) => {
-        if (t.total_questions > 0) {
-          totalAcc += (t.score / t.total_questions) * 100;
+        // ✅ Always show UI even if no data
+        if (!tests || tests.length === 0) {
+          setChartData([]);
+          setStats({
+            totalTests: 0,
+            avgAccuracy: 0,
+            bestScore: 0,
+          });
+          return;
         }
-      });
 
-      const avg = Math.round(totalAcc / tests.length);
+        const { data: answers } = await supabase
+          .from("test_results")
+          .select("test_id, is_correct")
+          .eq("user_id", user.id);
 
-      const best = Math.max(
-        ...tests.map((t) =>
-          t.total_questions > 0
-            ? Math.round((t.score / t.total_questions) * 100)
-            : 0
-        )
-      );
+        const answerMap: any = {};
 
-      setChartData(chart);
-      setStats({
-        totalTests: tests.length,
-        avgAccuracy: avg || 0,
-        bestScore: best || 0,
-      });
+        answers?.forEach((a) => {
+          if (!answerMap[a.test_id]) {
+            answerMap[a.test_id] = { total: 0, correct: 0 };
+          }
+          answerMap[a.test_id].total++;
+          if (a.is_correct) answerMap[a.test_id].correct++;
+        });
+
+        const last10 = tests.slice(-10);
+
+        const chart = last10.map((t, i) => {
+          const a = answerMap[t.id];
+          const percent =
+            a && a.total > 0
+              ? Math.round((a.correct / a.total) * 100)
+              : 0;
+
+          return {
+            name: `T${i + 1}`,
+            score: percent,
+          };
+        });
+
+        let totalAcc = 0;
+        let count = 0;
+
+        tests.forEach((t) => {
+          const a = answerMap[t.id];
+          if (a && a.total > 0) {
+            totalAcc += (a.correct / a.total) * 100;
+            count++;
+          }
+        });
+
+        const avg = count > 0 ? Math.round(totalAcc / count) : 0;
+
+        const best = Math.max(
+          ...tests.map((t) => {
+            const a = answerMap[t.id];
+            return a && a.total > 0
+              ? Math.round((a.correct / a.total) * 100)
+              : 0;
+          })
+        );
+
+        setChartData(chart);
+        setStats({
+          totalTests: tests.length,
+          avgAccuracy: avg || 0,
+          bestScore: best || 0,
+        });
+      } catch (err) {
+        console.error("Analytics error:", err);
+      }
     };
 
     fetch();
@@ -128,7 +163,7 @@ export default function Quiz() {
   };
 
   ////////////////////////////////////////////////////
-  // ⏱ TIMER FIXED
+  // ⏱ TIMER
   ////////////////////////////////////////////////////
   useEffect(() => {
     if (!started) return;
@@ -226,26 +261,33 @@ export default function Quiz() {
   };
 
   ////////////////////////////////////////////////////
-  // PRE START UI
+  // 🎯 START SCREEN (FIXED ANALYTICS UI)
   ////////////////////////////////////////////////////
   if (!started) {
     return (
       <div className="min-h-screen px-6 pt-28">
         <div className="max-w-6xl mx-auto space-y-8">
 
-          <motion.div className="p-12 rounded-3xl bg-gradient-to-r from-purple-600 to-blue-500 text-white">
+          {/* HERO */}
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-12 rounded-3xl bg-gradient-to-r from-purple-600 to-blue-500 text-white shadow-xl"
+          >
             <h1 className="text-5xl font-bold">Quiz Arena 🚀</h1>
 
             <button
               onClick={startQuiz}
               disabled={loading}
-              className="mt-6 px-8 py-4 bg-white text-black rounded-xl flex gap-2"
+              className="mt-6 px-8 py-4 bg-white text-black rounded-xl flex gap-2 items-center hover:scale-105 transition"
             >
               <FiPlay />
               {loading ? "Loading..." : "Start Test"}
             </button>
           </motion.div>
-           <div className="grid md:grid-cols-3 gap-6">
+
+          {/* SELECTORS */}
+          <div className="grid md:grid-cols-3 gap-6">
             <SelectorCard title="Time" icon={<FiClock />} options={[
               { label: "5m", value: 300 },
               { label: "10m", value: 600 },
@@ -266,89 +308,84 @@ export default function Quiz() {
             ]} selected={questionCount} setSelected={setQuestionCount} />
           </div>
 
-
-          {/* STATS */}
+          {/* STATS (ALWAYS VISIBLE NOW) */}
           <div className="grid md:grid-cols-3 gap-6">
             <StatCard title="Total Tests" value={stats.totalTests} />
             <StatCard title="Avg Accuracy" value={`${stats.avgAccuracy}%`} />
             <StatCard title="Best Score" value={`${stats.bestScore}%`} />
           </div>
 
-          {/* CHART */}
+          {/* CHART (SAFE RENDER) */}
           <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
             <h3 className="mb-4">Last 10 Tests</h3>
-            <ResponsiveContainer width="100%" height={200}>
-              <LineChart data={chartData}>
-                <XAxis dataKey="name" />
-                <Tooltip />
-                <Line type="monotone" dataKey="score" />
-              </LineChart>
-            </ResponsiveContainer>
+
+            {chartData.length === 0 ? (
+              <p className="opacity-60 text-sm">No data yet. Take a test 🚀</p>
+            ) : (
+              <ResponsiveContainer width="100%" height={200}>
+                <LineChart data={chartData}>
+                  <XAxis dataKey="name" />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="score" />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </div>
 
-          {/* SELECTORS */}
-         
         </div>
       </div>
     );
   }
 
   ////////////////////////////////////////////////////
-  // QUIZ UI (RESTORED)
+  // QUIZ UI (UNCHANGED)
   ////////////////////////////////////////////////////
+
   const q = questions[currentIndex];
 
   return (
     <div className="min-h-screen px-6 pt-28">
       <div className="max-w-4xl mx-auto">
 
-        {/* HEADER */}
         <div className="flex justify-between mb-4">
           <h2>{currentIndex + 1}/{questions.length}</h2>
           <span>⏱ {timeLeft}s</span>
         </div>
 
-        {/* ANALYTICS */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           <StatCard title="Attempted" value={`${attempted}/${questions.length}`} />
           <StatCard title="Accuracy" value={`${accuracy}%`} />
           <StatCard title="Correct" value={correctCount} />
         </div>
 
-        {/* QUESTION */}
         <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
           <h3 className="mb-6">{q.question}</h3>
 
           {q.options.map((opt: string) => {
-  const selected = answers[q.id];
-  const isCorrect = opt === q.correct_answer;
-  const isSelected = selected === opt;
+            const selected = answers[q.id];
+            const isCorrect = opt === q.correct_answer;
+            const isSelected = selected === opt;
 
-  let style = "bg-white/5";
+            let style = "bg-white/5";
 
-  if (selected) {
-    if (isCorrect) {
-      style = "bg-green-500 text-black"; // correct answer always green
-    } else if (isSelected && !isCorrect) {
-      style = "bg-red-500 text-white"; // wrong selected answer red
-    } else {
-      style = "bg-white/5 opacity-50"; // dim others
-    }
-  }
+            if (selected) {
+              if (isCorrect) style = "bg-green-500 text-black";
+              else if (isSelected) style = "bg-red-500 text-white";
+              else style = "bg-white/5 opacity-50";
+            }
 
-  return (
-    <button
-      key={opt}
-      onClick={() => handleAnswer(q.id, opt)}
-      className={`w-full p-3 mb-3 rounded-xl ${style}`}
-    >
-      {opt}
-    </button>
-  );
-})}
+            return (
+              <button
+                key={opt}
+                onClick={() => handleAnswer(q.id, opt)}
+                className={`w-full p-3 mb-3 rounded-xl ${style}`}
+              >
+                {opt}
+              </button>
+            );
+          })}
         </div>
 
-        {/* NAV */}
         <div className="mt-6 flex justify-between">
           <button
             onClick={() => setCurrentIndex((i) => Math.max(i - 1, 0))}
@@ -377,7 +414,6 @@ export default function Quiz() {
             </button>
           )}
         </div>
-
       </div>
     </div>
   );

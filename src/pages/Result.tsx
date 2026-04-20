@@ -13,7 +13,7 @@ export default function Result() {
   const user = useAuthStore((s) => s.user);
 
   const [result, setResult] = useState<any>(null);
-  const [rank, setRank] = useState<number | null>(null);
+  const [, setRank] = useState<number | null>(null);
   const [aiInsight, setAiInsight] = useState("Analyzing...");
   const [accuracy, setAccuracy] = useState(0);
 

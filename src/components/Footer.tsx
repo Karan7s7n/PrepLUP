@@ -21,7 +21,7 @@ export default function Footer() {
           <div>
             <h2 className={`text-xl font-semibold ${textBase}`}>Preplup</h2>
             <p className={`mt-2 text-sm ${textSecondary} max-w-xs`}>
-              AI-powered platform to help you crack placements faster with resume builder, interview prep, and personalized quizzes.
+              Platform to help you crack placements faster with resume builder, interview prep, and personalized quizzes.
             </p>
           </div>
 

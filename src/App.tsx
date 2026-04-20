@@ -7,7 +7,7 @@ import Dashboard from "./pages/Dashboard";
 import Quiz from "./pages/Quiz";
 import Interview from "./pages/Interview";
 import Result from "./pages/Result";
-import InterviewReport from "./pages/InterviewReport";
+import AssistantPage from "./pages/AssistantPage";
 
 
 import Navbar from "./components/Navbar";
@@ -78,13 +78,13 @@ function AppContent() {
               />
 
               <Route path="/quiz" element={<Quiz />} />
-              <Route path="/interview/report/:id" element={<InterviewReport />} />
               <Route path="/result" element={<Result />} />
               <Route path="/interview" element={<Interview />} />
               <Route path="/resume" element={<ResumeBuilder />} />
               <Route path="/mind-ease" element={<MindEase />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/assistant" element={<AssistantPage />} />
             </Routes>
           </main>
 
