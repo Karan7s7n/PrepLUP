@@ -10,16 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-<<<<<<< HEAD
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
-=======
->>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
     "@supabase/supabase-js": "^2.99.3",
     "@tailwindcss/vite": "^4.2.2",
-<<<<<<< HEAD
     "@tiptap/react": "^3.22.3",
     "@tiptap/starter-kit": "^3.22.3",
     "axios": "^1.13.6",
@@ -27,11 +23,9 @@
     "html2canvas": "^1.4.1",
     "html2pdf.js": "^0.14.0",
     "jspdf": "^4.2.1",
-=======
     "axios": "^1.13.6",
     "framer-motion": "^12.38.0",
     "html2pdf.js": "^0.14.0",
->>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
     "lucide-react": "^0.577.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
@@ -42,10 +36,7 @@
     "simplex-noise": "^4.0.3",
     "tailwindcss": "^4.2.2",
     "three": "^0.183.2",
-<<<<<<< HEAD
     "uuid": "^14.0.0",
-=======
->>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
     "vanta": "^0.5.24",
     "zustand": "^5.0.12"
   },
@@ -55,10 +46,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@types/three": "^0.183.1",
-<<<<<<< HEAD
     "@types/uuid": "^10.0.0",
-=======
->>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
     "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",

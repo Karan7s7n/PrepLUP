@@ -21,22 +21,17 @@ export default function Footer() {
           <div>
             <h2 className={`text-xl font-semibold ${textBase}`}>Preplup</h2>
             <p className={`mt-2 text-sm ${textSecondary} max-w-xs`}>
-<<<<<<< HEAD
               Platform to help you crack placements faster with resume builder, interview prep, and personalized quizzes.
-=======
               AI-powered platform to help you crack placements faster with resume feedback, interview prep, and skill tracking.
->>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
             </p>
           </div>
 
           {/* Links */}
           <div className={`flex gap-12 text-sm ${textSecondary}`}>
             <div className="flex flex-col gap-2">
-<<<<<<< HEAD
               <Link to="/features" className={`${textHover} transition`}>Features</Link>
             </div>
             <div className="flex flex-col gap-2">
-=======
               <span className={`font-medium ${textBase}`}>Product</span>
               <Link to="/features" className={`${textHover} transition`}>Features</Link>
               <Link to="/pricing" className={`${textHover} transition`}>Pricing</Link>
@@ -44,7 +39,6 @@ export default function Footer() {
             </div>
             <div className="flex flex-col gap-2">
               <span className={`font-medium ${textBase}`}>Company</span>
->>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
               <Link to="/about" className={`${textHover} transition`}>About</Link>
               <Link to="/contact" className={`${textHover} transition`}>Contact</Link>
             </div>

@@ -7,11 +7,10 @@ import Dashboard from "./pages/Dashboard";
 import Quiz from "./pages/Quiz";
 import Interview from "./pages/Interview";
 import Result from "./pages/Result";
-<<<<<<< HEAD
+
 import AssistantPage from "./pages/AssistantPage";
-=======
 import InterviewReport from "./pages/InterviewReport";
->>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
+
 
 
 import Navbar from "./components/Navbar";
@@ -23,13 +22,12 @@ import { useAuthListener } from "./hooks/useAuthListener";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 import { ThemeProvider, useTheme } from "./components/ui/ThemeContext";
-<<<<<<< HEAD
+
 import ResumeBuilder from "./pages/ResumeBuilder";
 import MindEase from "./pages/MindEase";
 import Profile from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPAge";
-=======
->>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
+
 
 function AppContent() {
   const fetchUser = useAuthStore((state) => state.fetchUser);
@@ -85,7 +83,7 @@ function AppContent() {
               />
 
               <Route path="/quiz" element={<Quiz />} />
-<<<<<<< HEAD
+
               <Route path="/result" element={<Result />} />
               <Route path="/interview" element={<Interview />} />
               <Route path="/resume" element={<ResumeBuilder />} />
@@ -93,11 +91,11 @@ function AppContent() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/assistant" element={<AssistantPage />} />
-=======
+
               <Route path="/interview/report/:id" element={<InterviewReport />} />
               <Route path="/result" element={<Result />} />
               <Route path="/interview" element={<Interview />} />
->>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
+
             </Routes>
           </main>
 
