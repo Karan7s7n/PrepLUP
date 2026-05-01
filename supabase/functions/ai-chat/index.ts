@@ -3,7 +3,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
 };
 
 serve(async (req: Request) => {
@@ -18,33 +19,44 @@ serve(async (req: Request) => {
     const GROQ_API_KEY = Deno.env.get("GROQ_API_KEY");
 
     const prompt = `
-You are a placement assistant.
+You are an expert placement mentor.
 
-User stats:
-- Tests: ${context?.tests}
-- Accuracy: ${context?.accuracy}
-- Avg Points: ${context?.avgPoints}
+User Stats:
+${JSON.stringify(context?.stats)}
 
-User question: ${message}
+Weak Topics:
+${JSON.stringify(context?.weakTopics)}
 
-Give short actionable advice.
+User Request:
+${message}
+
+Rules:
+- Give short actionable advice
+- Mention weak topics if present
+- Keep under 5 lines
 `;
 
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${GROQ_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "llama-3.1-8b-instant", // fast + free
-        messages: [
-          { role: "system", content: "You are a helpful placement assistant." },
-          { role: "user", content: prompt },
-        ],
-        max_tokens: 300,
-      }),
-    });
+    const response = await fetch(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${GROQ_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "llama-3.1-8b-instant",
+          messages: [
+            {
+              role: "system",
+              content: "You are a smart career coach.",
+            },
+            { role: "user", content: prompt },
+          ],
+          max_tokens: 300,
+        }),
+      }
+    );
 
     const data = await response.json();
 
@@ -59,7 +71,7 @@ Give short actionable advice.
         "Content-Type": "application/json",
       },
     });
-  } catch (err) {
+  } catch {
     return new Response(JSON.stringify({ reply: "Server error" }), {
       status: 500,
       headers: {

@@ -1,5 +1,4 @@
 "use client";
-<<<<<<< HEAD
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
@@ -12,24 +11,8 @@ import {
   FiActivity,
   FiFileText,
   FiPlay,
+  FiCpu,
 } from "react-icons/fi";
-=======
-import { motion } from "framer-motion";
-import {
-  FiBarChart2,
-  FiFileText,
-  FiActivity,
-  FiTarget,
-  FiTrendingUp,
-  FiAward,
-  FiPlay,
-} from "react-icons/fi";
-import { useTheme } from "../components/ui/ThemeContext";
-import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { supabase } from "../services/supabase";
-import { useAuthStore } from "../store/authStore";
->>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
 
 import {
   LineChart,
@@ -44,12 +27,17 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
 
-<<<<<<< HEAD
   const [profile, setProfile] = useState<any>(null);
   const [stats, setStats] = useState<any[]>([]);
   const [chartData, setChartData] = useState<any[]>([]);
   const [recent, setRecent] = useState<any>(null);
-  const [insight, setInsight] = useState("Loading insights...");
+  const [insight, setInsight] = useState("Analyzing your performance...");
+  const [loadingAI, setLoadingAI] = useState(false);
+
+  // 🆕 NEW STATES
+  const [weakTopics, setWeakTopics] = useState<any[]>([]);
+  const [studyPlan, setStudyPlan] = useState("");
+  const [loadingPlan, setLoadingPlan] = useState(false);
 
   //////////////////////////////////////////////////////
   // LOAD DATA
@@ -68,76 +56,37 @@ export default function Dashboard() {
       setProfile(profileData);
 
       // TESTS
-=======
-  const [stats, setStats] = useState<any>({
-    tests: 0,
-    avgScore: 0,
-    accuracy: 0,
-    points: 0,
-    streak: 0,
-  });
-
-  const [leaderboard, setLeaderboard] = useState<any[]>([]);
-  const [rank, setRank] = useState<number>(0);
-  const [chartData, setChartData] = useState<any[]>([]);
-  const [aiInsight, setAiInsight] = useState("Analyzing your performance...");
-
-  const baseGlass =
-    theme === "light"
-      ? "border-black/10 text-black"
-      : "border-white/10 text-white";
-
-  const tint = {
-    purple: "bg-purple-500/10",
-    blue: "bg-blue-500/10",
-    green: "bg-green-500/10",
-    yellow: "bg-yellow-500/10",
-    pink: "bg-pink-500/10",
-  };
-
-  useEffect(() => {
-    if (!user) return;
-
-    const fetchData = async () => {
-      ////////////////////////////////////////////////////
-      // 📊 TESTS
-      ////////////////////////////////////////////////////
->>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
       const { data: tests } = await supabase
         .from("tests")
         .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: true });
 
-<<<<<<< HEAD
       if (!tests || tests.length === 0) {
         setStats([
           { label: "Tests", value: 0 },
           { label: "Avg Points", value: 0 },
           { label: "Accuracy", value: "0%" },
         ]);
+        setInsight("Start practicing to unlock AI insights.");
         return;
       }
 
-      //////////////////////////////////////////////////////
-      // ✅ FETCH ALL ANSWERS (IMPORTANT FIX)
-      //////////////////////////////////////////////////////
+      // ANSWERS (with topic)
       const { data: answers } = await supabase
         .from("test_results")
-        .select("test_id, is_correct")
+        .select("topic, is_correct")
         .eq("user_id", user.id);
 
       //////////////////////////////////////////////////////
-      // 🎯 CALCULATIONS
+      // STATS
       //////////////////////////////////////////////////////
       const totalTests = tests.length;
 
-      // Avg Points (raw score)
       const avgPoints = Math.round(
         tests.reduce((sum, t) => sum + t.score, 0) / totalTests
       );
 
-      // Accuracy (based on correctness)
       const totalAnswers = answers?.length || 0;
       const correctAnswers =
         answers?.filter((a) => a.is_correct).length || 0;
@@ -147,17 +96,45 @@ export default function Dashboard() {
           ? Math.round((correctAnswers / totalAnswers) * 100)
           : 0;
 
-      //////////////////////////////////////////////////////
-      // SET STATS
-      //////////////////////////////////////////////////////
-      setStats([
+      const statsData = [
         { label: "Tests", value: totalTests },
         { label: "Avg Points", value: avgPoints },
         { label: "Accuracy", value: `${accuracy}%` },
-      ]);
+      ];
+
+      setStats(statsData);
 
       //////////////////////////////////////////////////////
-      // 📊 CHART (last 5 tests normalized)
+      // 🧠 WEAK TOPICS (NEW)
+      //////////////////////////////////////////////////////
+      const topicMap: any = {};
+
+      answers?.forEach((a) => {
+        if (!a.topic) return;
+
+        if (!topicMap[a.topic]) {
+          topicMap[a.topic] = { total: 0, correct: 0 };
+        }
+
+        topicMap[a.topic].total++;
+        if (a.is_correct) topicMap[a.topic].correct++;
+      });
+
+      const topicAccuracy = Object.entries(topicMap).map(
+        ([topic, val]: any) => ({
+          topic,
+          accuracy: Math.round((val.correct / val.total) * 100),
+        })
+      );
+
+      const weak = topicAccuracy
+        .filter((t: any) => t.accuracy < 60)
+        .sort((a, b) => a.accuracy - b.accuracy);
+
+      setWeakTopics(weak);
+
+      //////////////////////////////////////////////////////
+      // CHART
       //////////////////////////////////////////////////////
       const last5 = tests.slice(-5);
       const chart = last5.map((t, i) => ({
@@ -166,84 +143,65 @@ export default function Dashboard() {
           t.total_questions > 0
             ? Math.round((t.score / (t.total_questions * 20)) * 100)
             : 0,
-=======
-      ////////////////////////////////////////////////////
-      // 📈 RESULTS
-      ////////////////////////////////////////////////////
-      const { data: results } = await supabase
-        .from("test_results")
-        .select("is_correct")
-        .eq("user_id", user.id);
-
-      ////////////////////////////////////////////////////
-      // 📊 PROGRESS
-      ////////////////////////////////////////////////////
-      const { data: progress } = await supabase
-        .from("user_progress")
-        .select("*")
-        .eq("user_id", user.id)
-        .single();
-
-      ////////////////////////////////////////////////////
-      // 🧠 CALCULATIONS
-      ////////////////////////////////////////////////////
-      const safeTests = tests ?? [];
-      const totalTests = safeTests.length;
-
-      const avgScore =
-        totalTests > 0
-          ? Math.round(
-              safeTests.reduce(
-                (acc, t) => acc + (t.score / t.total_questions) * 100,
-                0
-              ) / totalTests
-            )
-          : 0;
-
-      const correct = results?.filter((r) => r.is_correct).length || 0;
-      const total = results?.length || 0;
-      const accuracy = total ? Math.round((correct / total) * 100) : 0;
-
-      setStats({
-        tests: totalTests,
-        avgScore,
-        accuracy,
-        points: progress?.points || 0,
-        streak: progress?.streak || 0,
-      });
-
-      ////////////////////////////////////////////////////
-      // 📉 CHART
-      ////////////////////////////////////////////////////
-      const chart = safeTests.map((t, i) => ({
-        name: `T${i + 1}`,
-        score: Math.round((t.score / t.total_questions) * 100),
->>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
       }));
 
       setChartData(chart);
 
-<<<<<<< HEAD
-      //////////////////////////////////////////////////////
-      // RECENT
-      //////////////////////////////////////////////////////
-      const latest = tests[tests.length - 1];
-      setRecent(latest);
+      setRecent(tests[tests.length - 1]);
 
       //////////////////////////////////////////////////////
-      // 🧠 INSIGHT
+      // 🤖 AI INSIGHT (UPDATED)
       //////////////////////////////////////////////////////
-      if (accuracy < 50) {
-        setInsight("Focus on fundamentals. Accuracy is low.");
-      } else if (accuracy < 75) {
-        setInsight("You're improving. Practice consistently.");
-      } else {
-        setInsight("Great performance 🚀 Try harder challenges.");
-      }
+      generateAIInsight(statsData, weak);
     };
 
     load();
   }, [user]);
+
+  //////////////////////////////////////////////////////
+  // 🤖 AI INSIGHT
+  //////////////////////////////////////////////////////
+  const generateAIInsight = async (statsData: any[], weak: any[]) => {
+    try {
+      setLoadingAI(true);
+
+      const { data } = await supabase.functions.invoke("ai-chat", {
+        body: {
+          message: "Analyze my performance",
+          context: {
+            stats: statsData,
+            weakTopics: weak,
+          },
+        },
+      });
+
+      setInsight(data?.reply || "Keep practicing consistently.");
+    } catch {
+      setInsight("Unable to fetch AI insight.");
+    }
+
+    setLoadingAI(false);
+  };
+
+  //////////////////////////////////////////////////////
+  // 🧠 STUDY PLAN
+  //////////////////////////////////////////////////////
+  const generateStudyPlan = async () => {
+    setLoadingPlan(true);
+
+    const { data } = await supabase.functions.invoke("ai-chat", {
+      body: {
+        message: "Create a study plan",
+        context: {
+          stats,
+          weakTopics,
+        },
+      },
+    });
+
+    setStudyPlan(data?.reply || "No plan generated");
+    setLoadingPlan(false);
+  };
 
   //////////////////////////////////////////////////////
   // UI CONFIG
@@ -276,9 +234,6 @@ export default function Dashboard() {
             <h1 className="text-4xl font-bold">
               Welcome back, {name} 👋
             </h1>
-            <p className="opacity-70 mt-2">
-              Track your growth and improve daily.
-            </p>
 
             <button
               onClick={() => navigate("/quiz")}
@@ -287,28 +242,6 @@ export default function Dashboard() {
               Start Test
             </button>
           </div>
-
-          {/* 🤖 AI CHATBOT CTA */}
-<div className={`p-8 rounded-3xl ${glass} flex flex-col md:flex-row items-center justify-between gap-6`}>
-  
-  <div>
-    <h2 className="text-2xl font-bold mb-2">
-      Your Personal Placement Assistant 🤖
-    </h2>
-    <p className="text-sm opacity-70 max-w-md">
-      Get personalized roadmaps, improve your weak areas, and prepare smarter
-      with AI-powered guidance tailored to your performance.
-    </p>
-  </div>
-
-  <button
-    onClick={() => navigate("/assistant")}
-    className="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-500 text-white rounded-xl font-semibold shadow-lg hover:scale-105 transition"
-  >
-    Open Assistant
-  </button>
-
-</div>
 
           <div className="flex justify-center">
             <div className="w-28 h-28 rounded-full overflow-hidden bg-white/10 flex items-center justify-center text-2xl font-bold">
@@ -321,10 +254,98 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* 🤖 AI CTA */}
+        <div className={`p-8 rounded-3xl ${glass}`}>
+          <h2 className="text-xl font-bold flex items-center gap-2">
+            <FiCpu /> AI Assistant
+          </h2>
+
+          <div className="flex gap-3 flex-wrap mt-3">
+            <button
+              onClick={() => navigate("/assistant")}
+              className="px-5 py-2 bg-purple-600 text-white rounded-xl"
+            >
+              Open Assistant
+            </button>
+
+            <button
+              onClick={generateStudyPlan}
+              className="px-5 py-2 bg-blue-600 text-white rounded-xl"
+            >
+              {loadingPlan ? "Generating..." : "AI Study Plan"}
+            </button>
+          </div>
+
+          {studyPlan && (
+            <p className="mt-4 text-sm whitespace-pre-line opacity-80">
+              {studyPlan}
+            </p>
+          )}
+        </div>
+
+        {/* 🧠 WEAK TOPICS */}
+        <div className={`p-6 rounded-3xl ${glass}`}>
+  <div className="flex justify-between items-center mb-4">
+    <h2 className="font-semibold">Review ⚠️</h2>
+    <span className="text-xs opacity-60">AI detected</span>
+  </div>
+
+  {weakTopics.length === 0 ? (
+    <div className="text-sm opacity-70"> 
+      <p className="text-xs mt-1">Keep practicing to maintain performance</p>
+    </div>
+  ) : (
+    <div className="space-y-4">
+      {weakTopics.map((t, i) => (
+        <div
+          key={i}
+          className="p-3 rounded-xl bg-black/20 border border-white/10 space-y-2"
+        >
+          {/* Topic + Accuracy */}
+          <div className="flex justify-between text-sm">
+            <div>
+              <p className="font-medium">{t.topic}</p>
+              {t.subtopic && (
+                <p className="text-xs opacity-60">{t.subtopic}</p>
+              )}
+            </div>
+
+            <span className="text-red-400 font-semibold">
+              {t.accuracy}%
+            </span>
+          </div>
+
+          {/* Progress bar */}
+          <div className="h-2 bg-gray-700 rounded">
+            <div
+              className="h-2 bg-red-500 rounded"
+              style={{ width: `${t.accuracy}%` }}
+            />
+          </div>
+
+          {/* Extra info */}
+          <div className="flex justify-between text-xs opacity-70">
+            <span>Level: {t.avgDifficulty || "—"}</span>
+            <span>{t.attempts || 0} attempts</span>
+          </div>
+
+          {/* Action */}
+          <button
+            onClick={() => navigate(`/interview?focus=${t.topic}`)}
+            className="text-xs px-3 py-1 bg-purple-600 rounded hover:bg-purple-700"
+          >
+            Practice this →
+          </button>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+
+        {/* EXISTING UI BELOW (UNCHANGED) */}
         {/* FEATURES */}
         <div className={`p-6 rounded-3xl ${glass}`}>
           <h2 className="mb-4 font-semibold">Features</h2>
-
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {services.map((s, i) => (
               <motion.div
@@ -336,116 +357,10 @@ export default function Dashboard() {
                 <div className="text-lg mb-2">{s.icon}</div>
                 <p className="text-sm font-semibold">{s.title}</p>
               </motion.div>
-=======
-      ////////////////////////////////////////////////////
-      // 🏆 LEADERBOARD
-      ////////////////////////////////////////////////////
-      const { data: allUsers } = await supabase
-        .from("user_progress")
-        .select("user_id, points")
-        .order("points", { ascending: false });
-
-      setLeaderboard(allUsers?.slice(0, 5) || []);
-
-      const userRank =
-        (allUsers?.findIndex((u) => u.user_id === user.id) ?? -1) + 1;
-
-      setRank(userRank > 0 ? userRank : 0);
-
-      ////////////////////////////////////////////////////
-      // 🧠 AI INSIGHT (SMART)
-      ////////////////////////////////////////////////////
-      if (accuracy < 40) {
-        setAiInsight(
-          "You're struggling with fundamentals. Focus on basics and consistency."
-        );
-      } else if (accuracy < 70) {
-        setAiInsight(
-          "Good progress. Work on weak areas and improve accuracy."
-        );
-      } else if (accuracy < 90) {
-        setAiInsight(
-          "Strong performance. Start solving harder problems to level up."
-        );
-      } else {
-        setAiInsight(
-          "Excellent! You're performing at a top level 🚀"
-        );
-      }
-    };
-
-    fetchData();
-  }, [user]);
-
-  return (
-    <div className="min-h-screen pt-28 pb-10 px-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-
-        {/* HERO */}
-        <div className="p-10 rounded-3xl bg-linear-to-r from-purple-600 to-blue-500 text-white">
-          <h1 className="text-4xl font-bold">Welcome back 👋</h1>
-          <p className="opacity-80 mt-2">
-            Rank #{rank} • {stats.points} pts • Streak 🔥 {stats.streak}
-          </p>
-        </div>
-
-        {/* 🔥 STATS CARDS */}
-        <div className="grid md:grid-cols-4 gap-4">
-          <StatCard title="Tests" value={stats.tests} />
-          <StatCard title="Avg Score" value={`${stats.avgScore}%`} />
-          <StatCard title="Accuracy" value={`${stats.accuracy}%`} />
-          <StatCard title="Points" value={stats.points} />
-        </div>
-
-        {/* FEATURES + LEADERBOARD */}
-        <div className="grid lg:grid-cols-3 gap-6">
-
-          {/* FEATURES */}
-          <div className={`lg:col-span-2 p-6 rounded-3xl ${baseGlass} ${tint.purple}`}>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
-              {[
-                { title: "Aptitude", icon: <FiTarget />, path: "/quiz" },
-                { title: "Interview", icon: <FiActivity />, path: "/interview" },
-                { title: "Resume", icon: <FiFileText />, path: "/resume" },
-                { title: "Analytics", icon: <FiBarChart2 />, path: "/analytics" },
-                { title: "Challenge", icon: <FiTrendingUp />, path: "/challenge" },
-                { title: "Leaderboard", icon: <FiAward />, path: "/leaderboard" },
-              ].map((f, i) => (
-                <motion.div
-                  key={i}
-                  whileHover={{ scale: 1.05 }}
-                  onClick={() => navigate(f.path)}
-                  className="p-5 rounded-xl bg-white/5 border border-white/10 cursor-pointer"
-                >
-                  <div className="text-lg mb-3">{f.icon}</div>
-                  <h3 className="text-sm font-semibold">{f.title}</h3>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-
-          {/* 🏆 LEADERBOARD */}
-          <div className={`p-6 rounded-3xl ${baseGlass} ${tint.blue}`}>
-            <h2 className="mb-4 font-semibold">Top 5 🏆</h2>
-
-            {leaderboard.map((u, i) => (
-              <div
-                key={i}
-                className={`mb-3 text-sm flex justify-between ${
-                  u.user_id === user.id ? "text-yellow-400 font-bold" : ""
-                }`}
-              >
-                <span>
-                  #{i + 1} {u.user_id === user.id ? "You" : "User"}
-                </span>
-                <span>{u.points}</span>
-              </div>
->>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
             ))}
           </div>
         </div>
 
-<<<<<<< HEAD
         {/* STATS */}
         <div className="grid md:grid-cols-3 gap-3">
           {stats.map((s, i) => (
@@ -458,13 +373,6 @@ export default function Dashboard() {
 
         {/* CHART */}
         <div className={`p-6 rounded-3xl ${glass}`}>
-          <h2 className="mb-4 font-semibold">Performance Trend</h2>
-=======
-        {/* 📊 CHART */}
-        <div className={`p-6 rounded-3xl ${baseGlass} ${tint.green}`}>
-          <h2 className="mb-4 font-semibold">Performance 📊</h2>
->>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
-
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={chartData}>
               <XAxis dataKey="name" />
@@ -474,143 +382,62 @@ export default function Dashboard() {
           </ResponsiveContainer>
         </div>
 
-<<<<<<< HEAD
-        
+        {/* RECENT + AI */}
 
-        {/* RECENT + INSIGHT */}
-        <div className="grid md:grid-cols-2 gap-6">
+  {/* 📊 LAST PERFORMANCE */}
+  <div className={`p-5 rounded-2xl ${glass} space-y-3`}>
+    <p className="text-xs opacity-60">Recent Performance</p>
 
-          <div className={`p-5 rounded-2xl ${glass}`}>
-            <h3 className="font-semibold mb-2">Recent Activity</h3>
-            {recent ? (
-              <p className="text-sm opacity-70">
-                Last Test Score: {recent.score} pts <br />
-                Questions: {recent.total_questions}
-              </p>
-            ) : (
-              <p className="opacity-60 text-sm">
-                No recent activity
-              </p>
-            )}
-          </div>
+    {recent ? (
+      <>
+        <h3 className="text-2xl font-bold">
+          {recent.score}
+        </h3>
 
-          <div className={`p-5 rounded-2xl ${glass}`}>
-            <h3 className="font-semibold mb-2">Insight</h3>
-            <p className="text-sm opacity-70">{insight}</p>
-          </div>
-
+        <div className="flex justify-between text-sm opacity-70">
+          <span>Questions: {recent.total_questions}</span>
+          <span>{recent.difficulty}</span>
         </div>
 
-        {/* CTA */}
-        {/* FEATURE EXPLANATION + CTA */}
-<div className="space-y-6">
-
-  <h2 className="text-2xl font-bold">Explore Features 🚀</h2>
-
-  <div className="grid md:grid-cols-2 gap-6">
-
-    {/* APTITUDE */}
-    <div className={`p-6 rounded-2xl ${glass}`}>
-      <h3 className="text-lg font-semibold mb-2">Aptitude Tests</h3>
-      <p className="text-sm opacity-70 mb-4">
-        Practice timed quizzes across multiple difficulty levels.
-        Improve speed, accuracy, and problem-solving skills.
+        <div className="w-full bg-white/10 rounded-full h-2 mt-2">
+          <div
+            className="h-2 rounded-full bg-green-500"
+            style={{
+              width: `${Math.min(
+                100,
+                Math.round(
+                  (recent.score / (recent.total_questions * 20)) * 100
+                )
+              )}%`,
+            }}
+          />
+        </div>
+      </>
+    ) : (
+      <p className="text-sm opacity-60">
+        No tests yet. Start one 🚀
       </p>
-
-      <button
-        onClick={() => navigate("/quiz")}
-        className="px-4 py-2 bg-purple-600 text-white rounded-lg"
-      >
-        Start Quiz
-      </button>
-    </div>
-
-    {/* INTERVIEW */}
-    <div className={`p-6 rounded-2xl ${glass}`}>
-      <h3 className="text-lg font-semibold mb-2">Interview Prep</h3>
-      <p className="text-sm opacity-70 mb-4">
-        Simulate real interview scenarios and improve your communication,
-        confidence, and response quality.
-      </p>
-
-      <button
-        onClick={() => navigate("/interview")}
-        className="px-4 py-2 bg-blue-600 text-white rounded-lg"
-      >
-        Practice Interview
-      </button>
-    </div>
-
-    {/* RESUME */}
-    <div className={`p-6 rounded-2xl ${glass}`}>
-      <h3 className="text-lg font-semibold mb-2">Resume Builder</h3>
-      <p className="text-sm opacity-70 mb-4">
-        Create a professional resume with structured templates and
-        enhaced editing tools to showcase your skills and experience effectively.
-      </p>
-
-      <button
-        onClick={() => navigate("/resume")}
-        className="px-4 py-2 bg-green-600 text-white rounded-lg"
-      >
-        Build Resume
-      </button>
-    </div>
-
-    {/* MIND EASE */}
-    <div className={`p-6 rounded-2xl ${glass}`}>
-      <h3 className="text-lg font-semibold mb-2">Mind Ease</h3>
-      <p className="text-sm opacity-70 mb-4">
-        Relax your mind with guided exercises, stress relief techniques,
-        and focus-enhancing activities.
-      </p>
-
-      <button
-        onClick={() => navigate("/mind-ease")}
-        className="px-4 py-2 bg-pink-600 text-white rounded-lg"
-      >
-        Relax Now
-      </button>
-    </div>
-
+    )}
   </div>
+
+  {/* 🤖 AI INSIGHTS */}
+  <div className={`p-5 rounded-2xl ${glass} space-y-3`}>
+    <p className="text-xs opacity-60">AI Insight</p>
+
+    <p className="text-sm leading-relaxed">
+      {loadingAI ? (
+        <span className="animate-pulse">Thinking...</span>
+      ) : insight ? (
+        insight
+      ) : (
+        "Take a test to get personalized feedback."
+      )}
+    </p>
+  </div>
+
 </div>
 
       </div>
-    </div>
+    
   );
 }
-=======
-        {/* 🧠 AI */}
-        <div className={`p-5 rounded-2xl ${baseGlass} ${tint.pink}`}>
-          <h3 className="font-semibold mb-2">AI Insight 🧠</h3>
-          <p className="text-sm">{aiInsight}</p>
-        </div>
-
-        {/* ▶️ CONTINUE */}
-        <div className={`p-5 rounded-2xl ${baseGlass} ${tint.yellow}`}>
-          <h3 className="font-semibold mb-2">Continue</h3>
-          <button
-            onClick={() => navigate("/quiz")}
-            className="mt-2 flex items-center gap-2 px-4 py-2 bg-white text-black rounded-lg text-sm"
-          >
-            <FiPlay /> Start / Resume Test
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-////////////////////////////////////////////////////
-// 🔥 STAT CARD
-////////////////////////////////////////////////////
-function StatCard({ title, value }: any) {
-  return (
-    <div className="p-5 rounded-2xl bg-white/5 border border-white/10">
-      <p className="text-xs opacity-60">{title}</p>
-      <h3 className="text-2xl font-bold">{value}</h3>
-    </div>
-  );
-}
->>>>>>> 4cc666b16c3c5ec0fd122fdc19566e586add59e9
