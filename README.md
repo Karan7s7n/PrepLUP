@@ -165,7 +165,7 @@ AI Roadmap Generator
 Community Discussion Portal
 👨‍💻 Developed By
 
-Karan Singh
+Karan Singh Negi
 Full Stack Developer | AI Web App Builder
 
 ⭐ Support
